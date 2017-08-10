@@ -119,13 +119,17 @@
             this.form.addEventListener('submit', addHandler.bind(this))
             function addHandler(event) {
                 event.preventDefault();
+                try {
                 if (!this.input.value) {
-                    alert('Error');
+                   throw new Error ('Вы не ввели задание')
                 } else {
                     var title = this.input.value;
                     var curentTask = controller.addItem(title);
                     this.render(curentTask);
                     this.input.value = '';
+                }
+                } catch(err) {
+                    alert(err.message);
                 }
             }
         },
