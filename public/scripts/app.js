@@ -225,13 +225,9 @@
                 var block = event.target.parentNode;
                 var date = block.querySelector('#date');
                  var id = listItem.getAttribute('data-id');
-                date = date.value;
-                
+                date = date.value;               
 
                 controller.catchEvent(id, 'date', date);
-                console.log(data);
-                
-
                 block.classList.remove('show');
             }
             function changeFlag() {
