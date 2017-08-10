@@ -35,6 +35,7 @@
             data.push({
                 id: idEl,
                 title: title,
+                priority: 0,
                 completed: false
             });
             var currentEl = data.length - 1;
@@ -47,12 +48,11 @@
             return true;
         },
         updateElement: function (id, status, title) {
-            if (status === 'modify') {
-                var element = this.findElement(id);
+            var element = this.findElement(id);
+            if (status === 'modify' || 'priority') {
                 var isModify = this.updateData(element, status, title);
                 return isModify;
             } else {
-                var element = this.findElement(id);
                 this.updateData(element);
                 return element.completed;
             }
@@ -70,6 +70,8 @@
                     if (status === 'modify') {
                         data[i].title = title;
                         return true;
+                    } else if (status == 'priority'){
+                         data[i].priority = title;
                     } else {
                         data[i].completed = !data[i].completed;
                     }
@@ -88,7 +90,7 @@
             if (status === 'delete') {
                 var status = model.deleteElement(id);
                 return status;
-            } else if (status === 'modify') {
+            } else if (status === 'modify' || 'priority') {
                 var status = model.updateElement(id, status, title);
                 return status;
             }
@@ -205,12 +207,34 @@
             function handleCogs(event) {
                 var listItem = event.target.parentNode;
                 var block = listItem.querySelector('.block');
+                var flagsList = block.querySelectorAll('.fa-flag');
+
+                for (var i = 0, len = flagsList.length; i < len; i++) {
+                    flagsList[i].addEventListener('click', changeFlag.bind(this));
+                }
                 block.classList.add('show');
                 block.addEventListener('click', disableMenu.bind(this));
             }
             function disableMenu(event) {
                 var block = event.target.parentNode;
                 block.classList.remove('show');
+            }
+            function changeFlag() {
+                var listItem = event.target.offsetParent.offsetParent;
+                var flag = listItem.querySelector('.fa-flag');
+                var onChange = event.target.getAttribute('class');
+                var toChange = flag.getAttribute('class');
+                var id = listItem.getAttribute('data-id');
+
+                if (!(onChange == toChange)) {
+                    flag.setAttribute('class', onChange);
+                    var priority = onChange[onChange.length - 1];
+                    controller.catchEvent(id, 'priority', priority);
+                    console.log(data);
+                }
+            }
+            function disableFlagListener(element) {
+                element.removeEventListener('click', this.changeFlag);
             }
         },
 
