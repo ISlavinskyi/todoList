@@ -36,6 +36,7 @@
                 id: idEl,
                 title: title,
                 priority: 0,
+                date: '',
                 completed: false
             });
             var currentEl = data.length - 1;
@@ -49,7 +50,7 @@
         },
         updateElement: function (id, status, title) {
             var element = this.findElement(id);
-            if (status === 'modify' || 'priority') {
+            if (status === 'modify' || 'priority' || 'date') {
                 var isModify = this.updateData(element, status, title);
                 return isModify;
             } else {
@@ -70,8 +71,10 @@
                     if (status === 'modify') {
                         data[i].title = title;
                         return true;
-                    } else if (status == 'priority'){
-                         data[i].priority = title;
+                    } else if (status == 'priority') {
+                        data[i].priority = title;
+                    } else if (status == 'date') {
+                        data[i].date = title;
                     } else {
                         data[i].completed = !data[i].completed;
                     }
@@ -90,7 +93,7 @@
             if (status === 'delete') {
                 var status = model.deleteElement(id);
                 return status;
-            } else if (status === 'modify' || 'priority') {
+            } else if (status === 'modify' || 'priority' || 'date') {
                 var status = model.updateElement(id, status, title);
                 return status;
             }
@@ -134,6 +137,7 @@
             var removeButton = this.createElement('button', { className: 'remove' }, ['Удалить']);
             var flag = this.createElement('i', { className: 'fa fa-flag important-0' });
             var times = this.createElement('i', { className: 'fa fa-times' });
+            var date = this.createElement('input', { id: 'date', type: 'date' });
             var arr = []
             for (var i = 0; i < 4; i++) {
                 var flagEl = this.createElement('i', { className: `fa fa-flag important-${i}` });
@@ -142,7 +146,7 @@
             arr.push(times);
             var flagsContainer = this.createElement('div', { className: 'flagsContainer' }, arr);
             var cogs = this.createElement('i', { className: 'fa fa-cogs', });
-            var block = this.createElement('div', { className: 'block' }, [times, flagsContainer]);
+            var block = this.createElement('div', { className: 'block' }, [times, flagsContainer, date]);
             var item = this.createElement('li', { className: `todo-item${todo.completed ? ' completed' : ''} `, 'data-id': todo.id }, [checkbox, flag, label, editInput, editButton, removeButton, block, cogs]);
             return this.eventListeners(item);
         },
@@ -151,10 +155,10 @@
             var editButton = listItem.querySelector('button.edit');
             var removeButton = listItem.querySelector('button.remove');
             var cogs = listItem.querySelector('.fa-cogs');
-            var times = listItem.querySelector('.fa-times');
-
+            // var times = listItem.querySelector('.fa-times');
+           
             cogs.addEventListener('click', handleCogs.bind(this));
-            times.addEventListener('click', disableMenu.bind(this));
+            // times.addEventListener('click', disableMenu.bind(this));
             checkbox.addEventListener('change', handleToggle.bind(this));
             editButton.addEventListener('click', handleEdit.bind(this));
             removeButton.addEventListener('click', handleRemove.bind(this));
@@ -207,16 +211,27 @@
             function handleCogs(event) {
                 var listItem = event.target.parentNode;
                 var block = listItem.querySelector('.block');
+                var times = block.querySelector('.fa-times');
                 var flagsList = block.querySelectorAll('.fa-flag');
 
                 for (var i = 0, len = flagsList.length; i < len; i++) {
                     flagsList[i].addEventListener('click', changeFlag.bind(this));
                 }
                 block.classList.add('show');
-                block.addEventListener('click', disableMenu.bind(this));
+                times.addEventListener('click', disableMenu.bind(this));
             }
             function disableMenu(event) {
+                 var listItem = event.target.parentNode.parentNode;
                 var block = event.target.parentNode;
+                var date = block.querySelector('#date');
+                 var id = listItem.getAttribute('data-id');
+                date = date.value;
+                
+
+                controller.catchEvent(id, 'date', date);
+                console.log(data);
+                
+
                 block.classList.remove('show');
             }
             function changeFlag() {
@@ -230,7 +245,6 @@
                     flag.setAttribute('class', onChange);
                     var priority = onChange[onChange.length - 1];
                     controller.catchEvent(id, 'priority', priority);
-                    console.log(data);
                 }
             }
             function disableFlagListener(element) {
