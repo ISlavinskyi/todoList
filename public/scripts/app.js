@@ -2,32 +2,50 @@
     var idEl = 0;
     var data = [];
     console.log('init')
-    
+    var obj = {
+        id: 2,
+        title: 'some text',
+        date: '12/12/1234',
+        priority: 3,
+        comleted: false
+    }
+
     // Модель
     var model = {
+        postItem: function (postData) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", 'http://localhost:3000/api/todoListData', true);
+            xhr.setRequestHeader("Content-type", "application/json");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
+                    // console.log(xhr);
+                }
+            }
+            xhr.send(JSON.stringify(postData));
+        },
         getItem: function () {
-            var httpRequest;
-            makeRequest();
-            function makeRequest() {
-                httpRequest = new XMLHttpRequest();
-
-                if (!httpRequest) {
-                    console.log('Giving up :( Cannot create an XMLHTTP instance');
-                    return false;
-                }
-                httpRequest.onreadystatechange = alertContents;
-                httpRequest.open('GET', 'http://localhost:3000/api/todoListData');
-                httpRequest.send();
-            }
-            function alertContents() {
-                if (httpRequest.readyState === XMLHttpRequest.DONE) {
-                    if (httpRequest.status === 302) {
-                        console.log(JSON.parse(httpRequest.responseText));            
-                    } else {
-                        console.log('There was a problem with the request.');
-                    }
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", 'http://localhost:3000/api/todoListData/', true);
+            xhr.setRequestHeader("Content-type", "application/json");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == XMLHttpRequest.DONE && xhr.status == 302) {
+                    var getData = xhr.responseText;
+                    data = JSON.parse(getData)
+                    controller.getData(data);
+                    // return JSON.parse(getData);
                 }
             }
+            xhr.send(null);
+        },
+        putItem: function (id, putData) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("PUT", 'http://localhost:3000/api/todoListData/' + id, true);
+            xhr.setRequestHeader("Content-type", "application/json");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
+                }
+            }
+            xhr.send(JSON.stringify(putData));
         },
         addItem: function (title) {
             idEl++;
@@ -49,14 +67,15 @@
         },
         updateElement: function (id, status, title) {
             var element = this.findElement(id);
-            if ( typeof status === 'boolean') {
-                this.updateData(element, status);
-                return element.completed;
+            if (typeof status === 'boolean') {
+                var bool = this.updateData(element, status);
+                return bool;
+
             }
             else if (status === 'modify' || 'priority' || 'date') {
                 var isModify = this.updateData(element, status, title);
                 return isModify;
-            } 
+            }
         },
         findElement: function (id) {
             for (var i = 0, len = data.length; i < len; i++) {
@@ -71,8 +90,16 @@
                     if (status === 'modify') {
                         data[i].title = title;
                         return true;
-                    } else if ( typeof status === 'boolean') {
-                        data[i].completed = !data[i].completed;
+                    } else if (typeof status === 'boolean') {
+
+                        if ('completed' in data[i]) {
+                            data[i].completed = !data[i].completed;
+                            return data[i].completed;
+                        } else {
+                            data[i].completed = true;
+                            return true;
+                        }
+
                     } else if (status === 'priority') {
                         data[i].priority = title;
                     } else if (status === 'date') {
@@ -89,12 +116,21 @@
         addItem: function (title) {
             return model.addItem(title);
         },
+        postData: function (data) {
+            model.postItem(data);
+        },
+        getData: function (data) {
+
+            view.init(data);
+
+        },
         catchEvent: function (id, status, title) {
             if (status === 'delete') {
                 var status = model.deleteElement(id);
                 return status;
-            } else if (typeof status === 'boolean') {                
+            } else if (typeof status === 'boolean') {
                 var checkStatus = model.updateElement(id, status);
+                model.putItem(id, { 'completed': status });
                 return checkStatus;
             } else if (status === 'modify' || 'priority' || 'date') {
                 var status = model.updateElement(id, status, title);
@@ -104,18 +140,23 @@
         },
 
         init: function () {
-            view.init();
-
+            model.getItem();
         }
     }
 
     // View - представление
     var view = {
         // Инициализация
-        init: function () {
+        init: function (data) {
             this.input = document.querySelector('#add-input');
             this.form = document.querySelector('#todo-form');
-
+            this.list = document.querySelector('#todo-list');
+            if (data) {
+                for (var i = 0; i < data.length; i++) {
+                    var listItem = this.createLi(data[i]);
+                    this.list.appendChild(listItem);
+                }
+            }
             this.form.addEventListener('submit', addHandler.bind(this))
             function addHandler(event) {
                 event.preventDefault();
@@ -277,6 +318,8 @@
             this.form = document.querySelector('#todo-form');
             var listItem = this.createLi(data);
             this.list.appendChild(listItem);
+            console.log(data);
+            controller.postData(data);
 
             function addEventListeners(listItem) {
                 this.checkbox = listItem.querySelector('.checkbox');
@@ -288,6 +331,5 @@
             }
         }
     };
-    model.getItem();
     controller.init();
 })();
