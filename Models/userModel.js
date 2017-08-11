@@ -4,6 +4,8 @@ var mongoose = require('mongoose'),
 var userModel = new Schema({
     id: { type: String },
     title: { type: String },
+    date: { type: String },
+    priority: { type: Number },
     comleted: { type: Boolean },
 }, { collection: 'todoList' });
 

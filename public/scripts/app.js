@@ -50,13 +50,14 @@
         },
         updateElement: function (id, status, title) {
             var element = this.findElement(id);
-            if (status === 'modify' || 'priority' || 'date') {
-                var isModify = this.updateData(element, status, title);
-                return isModify;
-            } else {
-                this.updateData(element);
+            if ( typeof status === 'boolean') {
+                this.updateData(element, status);
                 return element.completed;
             }
+            else if (status === 'modify' || 'priority' || 'date') {
+                var isModify = this.updateData(element, status, title);
+                return isModify;
+            } 
         },
         findElement: function (id) {
             for (var i = 0, len = data.length; i < len; i++) {
@@ -71,12 +72,12 @@
                     if (status === 'modify') {
                         data[i].title = title;
                         return true;
-                    } else if (status == 'priority') {
-                        data[i].priority = title;
-                    } else if (status == 'date') {
-                        data[i].date = title;
-                    } else {
+                    } else if ( typeof status === 'boolean') {
                         data[i].completed = !data[i].completed;
+                    } else if (status === 'priority') {
+                        data[i].priority = title;
+                    } else if (status === 'date') {
+                        data[i].date = title;
                     }
                     break;
                 }
@@ -93,14 +94,14 @@
             if (status === 'delete') {
                 var status = model.deleteElement(id);
                 return status;
+            } else if (typeof status === 'boolean') {                
+                var checkStatus = model.updateElement(id, status);
+                return checkStatus;
             } else if (status === 'modify' || 'priority' || 'date') {
                 var status = model.updateElement(id, status, title);
                 return status;
             }
-            else {
-                var status = model.updateElement(id, status);
-                return status;
-            }
+
         },
 
         init: function () {
@@ -120,15 +121,15 @@
             function addHandler(event) {
                 event.preventDefault();
                 try {
-                if (!this.input.value) {
-                   throw new Error ('Вы не ввели задание')
-                } else {
-                    var title = this.input.value;
-                    var curentTask = controller.addItem(title);
-                    this.render(curentTask);
-                    this.input.value = '';
-                }
-                } catch(err) {
+                    if (!this.input.value) {
+                        throw new Error('Вы не ввели задание')
+                    } else {
+                        var title = this.input.value;
+                        var curentTask = controller.addItem(title);
+                        this.render(curentTask);
+                        this.input.value = '';
+                    }
+                } catch (err) {
                     alert(err.message);
                 }
             }
@@ -160,7 +161,7 @@
             var removeButton = listItem.querySelector('button.remove');
             var cogs = listItem.querySelector('.fa-cogs');
             // var times = listItem.querySelector('.fa-times');
-           
+
             cogs.addEventListener('click', handleCogs.bind(this));
             // times.addEventListener('click', disableMenu.bind(this));
             checkbox.addEventListener('change', handleToggle.bind(this));
@@ -225,11 +226,11 @@
                 times.addEventListener('click', disableMenu.bind(this));
             }
             function disableMenu(event) {
-                 var listItem = event.target.parentNode.parentNode;
+                var listItem = event.target.parentNode.parentNode;
                 var block = event.target.parentNode;
                 var date = block.querySelector('#date');
-                 var id = listItem.getAttribute('data-id');
-                date = date.value;               
+                var id = listItem.getAttribute('data-id');
+                date = date.value;
 
                 controller.catchEvent(id, 'date', date);
                 block.classList.remove('show');
@@ -275,7 +276,6 @@
         render: function (data) {
             this.list = document.querySelector('#todo-list');
             this.form = document.querySelector('#todo-form');
-
             var listItem = this.createLi(data);
             this.list.appendChild(listItem);
 
