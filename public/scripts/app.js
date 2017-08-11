@@ -2,6 +2,7 @@
     var idEl = 0;
     var data = [];
     console.log('init')
+    
     // Модель
     var model = {
         getItem: function () {
@@ -15,15 +16,13 @@
                     return false;
                 }
                 httpRequest.onreadystatechange = alertContents;
-                httpRequest.open('GET', 'http://localhost:3000/api/');
+                httpRequest.open('GET', 'http://localhost:3000/api/todoListData');
                 httpRequest.send();
             }
             function alertContents() {
                 if (httpRequest.readyState === XMLHttpRequest.DONE) {
-                    if (httpRequest.status === 200) {
-                        console.log(JSON.parse(httpRequest.responseText).login);
-                        var updateName = document.querySelector('h1');
-                        updateName.innerHTML = "Hello " + JSON.parse(httpRequest.responseText).login
+                    if (httpRequest.status === 302) {
+                        console.log(JSON.parse(httpRequest.responseText));            
                     } else {
                         console.log('There was a problem with the request.');
                     }
@@ -289,5 +288,6 @@
             }
         }
     };
+    model.getItem();
     controller.init();
 })();
