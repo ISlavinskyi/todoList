@@ -2,13 +2,11 @@
     var idEl = 0;
     var data = [];
     console.log('init');
-    var obj = {
-        id: 2,
-        title: 'some text',
-        date: '12/12/1234',
-        priority: 3,
-        comleted: false
-    };
+    var newDate = new Date();
+    // Get the month, day, and year.  
+    var dateString = (newDate.getMonth() + 1) + ".";
+    dateString += newDate.getDate() + ".";
+    dateString += newDate.getFullYear();
     // Модель
     var model = {
         requestData: function (obj) {
@@ -73,7 +71,6 @@
                         data[i].title = title;
                         return true;
                     } else if (typeof status === 'boolean') {
-
                         if ('completed' in data[i]) {
                             data[i].completed = !data[i].completed;
                             return data[i].completed;
@@ -81,7 +78,6 @@
                             data[i].completed = true;
                             return true;
                         }
-
                     } else if (status === 'priority') {
                         data[i].priority = title;
                     } else if (status === 'date') {
@@ -182,7 +178,9 @@
             var removeButton = this.createElement('button', { className: 'remove' }, ['Удалить']);
             var flag = this.createElement('i', { className: `fa fa-flag important-${todo.priority}` });
             var times = this.createElement('i', { className: 'fa fa-times' });
-            var date = this.createElement('input', { id: 'date', type: 'date'});
+            var date = this.createElement('input', { id: 'date', type: 'date' });
+            var dateBlock = this.createElement('div', { className: 'date-block' }, [dateString]);
+            var listBlock = this.createElement('div', { className: 'title list-block' }, [label, dateBlock]);
             var arr = []
             for (var i = 0; i < 4; i++) {
                 var flagEl = this.createElement('i', { className: `fa fa-flag important-${i}` });
@@ -192,7 +190,7 @@
             var flagsContainer = this.createElement('div', { className: 'flagsContainer' }, arr);
             var cogs = this.createElement('i', { className: 'fa fa-cogs', });
             var block = this.createElement('div', { className: 'block' }, [times, flagsContainer, date]);
-            var item = this.createElement('li', { className: `todo-item${todo.completed ? ' completed' : ''} `, 'data-id': todo.id }, [checkbox, flag, label, editInput, editButton, removeButton, block, cogs]);
+            var item = this.createElement('li', { className: `todo-item${todo.completed ? ' completed' : ''} `, 'data-id': todo.id }, [checkbox, flag, listBlock, editInput, editButton, removeButton, block, cogs]);
             return this.eventListeners(item);
         },
         eventListeners: function (listItem) {
