@@ -24,7 +24,11 @@ var routes = function (userData) {
     userRouter.route('/todoListData/:id')
         .put(function (req, res) {
             userData.findOne({id:req.body.id}, function(err, data){
-                data.completed = !data.completed; 
+                if (req.body.hasOwnProperty('completed') && data.completed == !req.body.completed) {
+                     data.completed = !data.completed;
+                } else if (req.body.hasOwnProperty('title')) {
+                    data.title = req.body.title;
+                }
                 data.save();
             });
 

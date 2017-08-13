@@ -124,6 +124,15 @@
                 return checkStatus;
             } else if (status === 'modify' || 'priority' || 'date') {
                 var status = model.updateElement(id, status, title);
+                var obj = {
+                    type: 'PUT',
+                    id:id,
+                    body: {
+                        title: title,
+                        id:id
+                    }
+                };
+                model.requestData(obj);
                 return status;
             }
 
@@ -274,6 +283,7 @@
                 var onChange = event.target.getAttribute('class');
                 var toChange = flag.getAttribute('class');
                 var id = listItem.getAttribute('data-id');
+                this.getElement({target:listItem, getAttribute:'data-id'}, this);
 
                 if (!(onChange == toChange)) {
                     flag.setAttribute('class', onChange);
@@ -285,7 +295,9 @@
                 element.removeEventListener('click', this.changeFlag);
             }
         },
-
+        getElement: function (obj) {
+           console.log(obj.target)
+        },
         createElement: function (tag, props, childrens) {
             var element = document.createElement(tag);
             var arr = Object.keys(props);
