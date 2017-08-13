@@ -6,10 +6,9 @@ var routes = function (userData) {
 
     userRouter.route('/todoListData')
         .post(function (req, res) {
-            var postData = new userData(req.body);
-            console.log(req.body);
-            postData.save();
-            res.status(200).send('hello');
+            var Data = new userData(req.body);
+            Data.save();
+            res.status(201);
         })
         .get(function (req, res) {
             var query = req.query;
@@ -20,12 +19,23 @@ var routes = function (userData) {
                 else {
                     res.status(302).send(data);
                 }
-            })
-        })
+            });
+        });
     userRouter.route('/todoListData/:id')
         .put(function (req, res) {
-            res.status(200);
-            console.log(req.body);
+            userData.findOne({id:req.body.id}, function(err, data){
+                data.completed = !data.completed; 
+                data.save();
+            });
+
+        })
+        .delete(function (req, res) {
+            if (err) {
+                res.status(500).send(err);
+            }
+            else {
+                res.status(204);
+            }
         });
     return userRouter;
 };

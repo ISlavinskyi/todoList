@@ -6,7 +6,7 @@ var userModel = new Schema({
     title: { type: String },
     date: { type: String },
     priority: { type: Number },
-    comleted: { type: Boolean },
+    completed: { type: Boolean },
 }, { collection: 'todoList' });
 
 module.exports = mongoose.model('todoList', userModel);

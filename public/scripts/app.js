@@ -8,44 +8,26 @@
         date: '12/12/1234',
         priority: 3,
         comleted: false
-    }
+    };
 
     // Модель
     var model = {
-        postItem: function (postData) {
+        requestData: function (obj) {
             var xhr = new XMLHttpRequest();
-            xhr.open("POST", 'http://localhost:3000/api/todoListData', true);
+            xhr.open(obj.type, 'http://localhost:3000/api/todoListData/' + obj.id, true);
             xhr.setRequestHeader("Content-type", "application/json");
             xhr.onreadystatechange = function () {
-                if (xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
-                    // console.log(xhr);
-                }
-            }
-            xhr.send(JSON.stringify(postData));
-        },
-        getItem: function () {
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", 'http://localhost:3000/api/todoListData/', true);
-            xhr.setRequestHeader("Content-type", "application/json");
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState == XMLHttpRequest.DONE && xhr.status == 302) {
+                if (xhr.readyState == XMLHttpRequest.DONE && xhr.status == 201) {
+
+                } else if (xhr.readyState == XMLHttpRequest.DONE && xhr.status == 302) {
                     var getData = xhr.responseText;
-                    data = JSON.parse(getData)
+                    data = JSON.parse(getData);
                     controller.getData(data);
-                    // return JSON.parse(getData);
+                } else if (xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
+
                 }
-            }
-            xhr.send(null);
-        },
-        putItem: function (id, putData) {
-            var xhr = new XMLHttpRequest();
-            xhr.open("PUT", 'http://localhost:3000/api/todoListData/' + id, true);
-            xhr.setRequestHeader("Content-type", "application/json");
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
-                }
-            }
-            xhr.send(JSON.stringify(putData));
+            };
+            xhr.send(JSON.stringify(obj.body));
         },
         addItem: function (title) {
             idEl++;
@@ -109,7 +91,7 @@
                 }
             }
         }
-    }
+    };
 
     // Контролер
     var controller = {
@@ -117,7 +99,7 @@
             return model.addItem(title);
         },
         postData: function (data) {
-            model.postItem(data);
+            model.requestData(data);
         },
         getData: function (data) {
 
@@ -130,7 +112,15 @@
                 return status;
             } else if (typeof status === 'boolean') {
                 var checkStatus = model.updateElement(id, status);
-                model.putItem(id, { 'completed': status });
+                var obj = {
+                    type: 'PUT',
+                    id: id,
+                    body: {
+                        completed: !status,
+                        id: id
+                    }
+                };
+                model.requestData(obj);
                 return checkStatus;
             } else if (status === 'modify' || 'priority' || 'date') {
                 var status = model.updateElement(id, status, title);
@@ -140,7 +130,12 @@
         },
 
         init: function () {
-            model.getItem();
+            var obj = {
+                type: 'GET',
+                id: '',
+                body: null
+            };
+            model.requestData(obj);
         }
     }
 
@@ -151,8 +146,10 @@
             this.input = document.querySelector('#add-input');
             this.form = document.querySelector('#todo-form');
             this.list = document.querySelector('#todo-list');
-            if (data) {
-                for (var i = 0; i < data.length; i++) {
+            if (data.length > 0) {
+                len = data.length;
+                idEl = data[len - 1].id || 1;
+                for (var i = 0; i < len; i++) {
                     var listItem = this.createLi(data[i]);
                     this.list.appendChild(listItem);
                 }
@@ -200,10 +197,7 @@
             var editButton = listItem.querySelector('button.edit');
             var removeButton = listItem.querySelector('button.remove');
             var cogs = listItem.querySelector('.fa-cogs');
-            // var times = listItem.querySelector('.fa-times');
-
             cogs.addEventListener('click', handleCogs.bind(this));
-            // times.addEventListener('click', disableMenu.bind(this));
             checkbox.addEventListener('change', handleToggle.bind(this));
             editButton.addEventListener('click', handleEdit.bind(this));
             removeButton.addEventListener('click', handleRemove.bind(this));
@@ -230,7 +224,6 @@
                 var title = input.value;
                 var isEditing = listItem.classList.contains('editing');
                 if (isEditing) {
-                    var title = input.value;
                     var status = controller.catchEvent(id, 'modify', title);
                     if (status) {
                         listItem.classList.remove('editing');
@@ -318,8 +311,13 @@
             this.form = document.querySelector('#todo-form');
             var listItem = this.createLi(data);
             this.list.appendChild(listItem);
-            console.log(data);
-            controller.postData(data);
+            data.completed = false;
+            var obj = {
+                type: 'POST',
+                id: '',
+                body: data
+            };
+            controller.postData(obj);
 
             function addEventListeners(listItem) {
                 this.checkbox = listItem.querySelector('.checkbox');
