@@ -23,23 +23,25 @@ var routes = function (userData) {
         });
     userRouter.route('/todoListData/:id')
         .put(function (req, res) {
-            userData.findOne({id:req.body.id}, function(err, data){
+            userData.findOne({ id: req.body.id }, function (err, data) {
                 if (req.body.hasOwnProperty('completed') && data.completed == !req.body.completed) {
-                     data.completed = !data.completed;
+                    data.completed = !data.completed;
                 } else if (req.body.hasOwnProperty('title')) {
                     data.title = req.body.title;
+                } else if (req.body.hasOwnProperty('priority')) {
+                    data.priority = req.body.priority;
                 }
+                res.status(200);
                 data.save();
             });
 
         })
         .delete(function (req, res) {
-            if (err) {
-                res.status(500).send(err);
-            }
-            else {
-                res.status(204);
-            }
+            userData.remove({id: req.body.id}, function (err, result){
+                
+            });
+            res.status(204);
+
         });
     return userRouter;
 };

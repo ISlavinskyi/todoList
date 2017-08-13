@@ -1,7 +1,7 @@
 (function () {
     var idEl = 0;
     var data = [];
-    console.log('init')
+    console.log('init');
     var obj = {
         id: 2,
         title: 'some text',
@@ -9,7 +9,6 @@
         priority: 3,
         comleted: false
     };
-
     // Модель
     var model = {
         requestData: function (obj) {
@@ -24,6 +23,8 @@
                     data = JSON.parse(getData);
                     controller.getData(data);
                 } else if (xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
+
+                } else if (xhr.readyState == XMLHttpRequest.DONE && xhr.status == 204) {
 
                 }
             };
@@ -52,7 +53,6 @@
             if (typeof status === 'boolean') {
                 var bool = this.updateData(element, status);
                 return bool;
-
             }
             else if (status === 'modify' || 'priority' || 'date') {
                 var isModify = this.updateData(element, status, title);
@@ -92,7 +92,6 @@
             }
         }
     };
-
     // Контролер
     var controller = {
         addItem: function (title) {
@@ -102,42 +101,38 @@
             model.requestData(data);
         },
         getData: function (data) {
-
             view.init(data);
-
         },
         catchEvent: function (id, status, title) {
-            if (status === 'delete') {
-                var status = model.deleteElement(id);
-                return status;
-            } else if (typeof status === 'boolean') {
-                var checkStatus = model.updateElement(id, status);
-                var obj = {
-                    type: 'PUT',
+            var checkStatus;
+            var obj = {
+                type: 'PUT',
+                id: id,
+                body: {
                     id: id,
-                    body: {
-                        completed: !status,
-                        id: id
-                    }
-                };
+                }
+            };
+            if (status === 'delete') {
+                obj.type = 'DELETE';
+                model.requestData(obj);
+                checkStatus = model.deleteElement(id);
+                return checkStatus;
+            } else if (typeof status === 'boolean') {
+                checkStatus = model.updateElement(id, status);
+                obj.body.completed = !status;
                 model.requestData(obj);
                 return checkStatus;
             } else if (status === 'modify' || 'priority' || 'date') {
-                var status = model.updateElement(id, status, title);
-                var obj = {
-                    type: 'PUT',
-                    id:id,
-                    body: {
-                        title: title,
-                        id:id
-                    }
-                };
+                if (status === 'modify') {
+                    obj.body.title = title;
+                } else if (status === 'priority') {
+                    obj.body.priority = title;
+                }
+                checkStatus = model.updateElement(id, status, title);
                 model.requestData(obj);
-                return status;
+                return checkStatus;
             }
-
         },
-
         init: function () {
             var obj = {
                 type: 'GET',
@@ -146,8 +141,7 @@
             };
             model.requestData(obj);
         }
-    }
-
+    };
     // View - представление
     var view = {
         // Инициализация
@@ -168,7 +162,7 @@
                 event.preventDefault();
                 try {
                     if (!this.input.value) {
-                        throw new Error('Вы не ввели задание')
+                        throw new Error('Вы не ввели задание');
                     } else {
                         var title = this.input.value;
                         var curentTask = controller.addItem(title);
@@ -186,9 +180,9 @@
             var editInput = this.createElement('input', { type: 'text', className: 'textfield' });
             var editButton = this.createElement('button', { className: 'edit' }, ['Изменить']);
             var removeButton = this.createElement('button', { className: 'remove' }, ['Удалить']);
-            var flag = this.createElement('i', { className: 'fa fa-flag important-0' });
+            var flag = this.createElement('i', { className: `fa fa-flag important-${todo.priority}` });
             var times = this.createElement('i', { className: 'fa fa-times' });
-            var date = this.createElement('input', { id: 'date', type: 'date' });
+            var date = this.createElement('input', { id: 'date', type: 'date'});
             var arr = []
             for (var i = 0; i < 4; i++) {
                 var flagEl = this.createElement('i', { className: `fa fa-flag important-${i}` });
@@ -212,7 +206,6 @@
             removeButton.addEventListener('click', handleRemove.bind(this));
 
             return listItem;
-
             function handleToggle(event) {
                 var listItem = event.target.parentNode;
                 var id = listItem.getAttribute('data-id');
@@ -283,7 +276,7 @@
                 var onChange = event.target.getAttribute('class');
                 var toChange = flag.getAttribute('class');
                 var id = listItem.getAttribute('data-id');
-                this.getElement({target:listItem, getAttribute:'data-id'}, this);
+                this.getElement({ target: listItem, getAttribute: 'data-id' }, this);
 
                 if (!(onChange == toChange)) {
                     flag.setAttribute('class', onChange);
@@ -296,7 +289,7 @@
             }
         },
         getElement: function (obj) {
-           console.log(obj.target)
+            console.log(obj.target)
         },
         createElement: function (tag, props, childrens) {
             var element = document.createElement(tag);
