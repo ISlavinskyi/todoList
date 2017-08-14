@@ -1,12 +1,8 @@
 (function () {
     var idEl = 0;
     var data = [];
-    console.log('init');
     var newDate = new Date();
-    // Get the month, day, and year.  
     var dateString = newDate.getFullYear() + '-' + (newDate.getMonth() + 1) + '-' + newDate.getDate();
-
-    // Модель
     var model = {
         requestData: function (obj) {
             var xhr = new XMLHttpRequest();
@@ -87,7 +83,6 @@
             }
         }
     };
-    // Контролер
     var controller = {
         addItem: function (title) {
             return model.addItem(title);
@@ -147,15 +142,13 @@
             model.requestData(obj);
         }
     };
-    // View - представление
     var view = {
-        // Инициализация
         init: function (data) {
             this.input = document.querySelector('#add-input');
             this.form = document.querySelector('#todo-form');
             this.list = document.querySelector('#todo-list');
-            this.filter = document.querySelector('.filter-text');            
-            
+            this.filter = document.querySelector('.filter-text');
+
             this.filter.addEventListener('click', filterClick);
 
             if (data.length > 0) {
@@ -166,30 +159,26 @@
                     this.list.appendChild(listItem);
                 }
             }
-            this.form.addEventListener('submit', addHandler.bind(this))
+            this.form.addEventListener('submit', addHandler.bind(this));
+
             function filterClick(event) {
                 var list = document.querySelectorAll('.todo-item');
-                // if(event.target) event.target.classList.contains('important-2')
-                var priority = event.target.className[event.target.className.length-1];
-                console.log(priority);
-                for(var i = 0; i < data.length; i++) {
-                    var listId = list[i].getAttribute('data-id');
-                    var flag = list[i].querySelector('.fa');
-                    if(flag.className[flag.className.length-1] != priority) {
-                        list[i].classList.add('filter-data');
-                        
-                    } else {
-                        console.log(listId);
-                        console.log(list[i]);
+                var priority = event.target.className[event.target.className.length - 1];
+                var refresh = document.querySelector('.fa-refresh');
+                if (event.target.classList.contains('fa-refresh')) {
+                    for (var i = 0; i < data.length; i++) {
+                        list[i].classList.remove('filter-data');
                     }
-                    
-                    //     // var element = controller.findElement(data[i].id);
-                    //     // element.classList.add('filter-data');
-                        
-                    //     console.log(list);
-                    // }
+                } else if (event.target.classList.contains('fa-flag')) {
+                    for (var i = 0; i < data.length; i++) {
+                        list[i].classList.remove('filter-data');
+                        var listId = list[i].getAttribute('data-id');
+                        var flag = list[i].querySelector('.fa-flag');
+                        if (flag.className[flag.className.length - 1] != priority) {
+                            list[i].classList.add('filter-data');
+                        }
+                    }
                 }
-                
             }
             function addHandler(event) {
                 event.preventDefault();
