@@ -148,8 +148,11 @@
             this.form = document.querySelector('#todo-form');
             this.list = document.querySelector('#todo-list');
             this.filter = document.querySelector('.filter-text');
+            this.settings = document.querySelector('#settings');
+            this.filterDate = this.settings.querySelector('input');
 
             this.filter.addEventListener('click', filterClick);
+            this.filterDate.addEventListener('change', dateChange);
 
             if (data.length > 0) {
                 len = data.length;
@@ -160,6 +163,17 @@
                 }
             }
             this.form.addEventListener('submit', addHandler.bind(this));
+            function dateChange() {
+                var value = event.target.value;
+                var list = document.querySelectorAll('.todo-item');
+                for (var i = 0; i < data.length; i++) {
+                    var block = list[i].querySelector('.date-block');
+                    list[i].classList.remove('filter-data');
+                    if (value != block.innerText) {
+                        list[i].classList.add('filter-data');
+                    }
+                }
+            }
 
             function filterClick(event) {
                 var list = document.querySelectorAll('.todo-item');
