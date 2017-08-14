@@ -4,9 +4,8 @@
     console.log('init');
     var newDate = new Date();
     // Get the month, day, and year.  
-    var dateString = (newDate.getMonth() + 1) + ".";
-    dateString += newDate.getDate() + ".";
-    dateString += newDate.getFullYear();
+    var dateString = newDate.getFullYear() + '-' + (newDate.getMonth() + 1) + '-' + newDate.getDate();
+
     // Модель
     var model = {
         requestData: function (obj) {
@@ -94,7 +93,12 @@
             return model.addItem(title);
         },
         postData: function (data) {
-            model.requestData(data);
+            var obj = {
+                type: 'POST',
+                id: '',
+                body: data
+            };
+            model.requestData(obj);
         },
         getData: function (data) {
             view.init(data);
@@ -123,11 +127,16 @@
                     obj.body.title = title;
                 } else if (status === 'priority') {
                     obj.body.priority = title;
+                } else if (status === 'date') {
+                    obj.body.date = title;
                 }
                 checkStatus = model.updateElement(id, status, title);
                 model.requestData(obj);
                 return checkStatus;
             }
+        },
+        findElement: function (id) {
+            return model.findElement(id);
         },
         init: function () {
             var obj = {
@@ -179,7 +188,7 @@
             var flag = this.createElement('i', { className: `fa fa-flag important-${todo.priority}` });
             var times = this.createElement('i', { className: 'fa fa-times' });
             var date = this.createElement('input', { id: 'date', type: 'date' });
-            var dateBlock = this.createElement('div', { className: 'date-block' }, [dateString]);
+            var dateBlock = this.createElement('div', { className: 'date-block' }, [todo.date || dateString]);
             var listBlock = this.createElement('div', { className: 'title list-block' }, [label, dateBlock]);
             var arr = []
             for (var i = 0; i < 4; i++) {
@@ -263,8 +272,15 @@
                 var block = event.target.parentNode;
                 var date = block.querySelector('#date');
                 var id = listItem.getAttribute('data-id');
-                date = date.value;
-
+                var times = block.querySelector('.fa-times');
+                // date = date.value;
+                if (date.value) {
+                    var dataElement = controller.findElement(id);
+                    var dateBlock = listItem.querySelector('.date-block');
+                    dateBlock.innerText = date.value;
+                    dataElement.date = date.value;
+                    controller.catchEvent(dataElement.id, 'date', date.value)
+                }
                 controller.catchEvent(id, 'date', date);
                 block.classList.remove('show');
             }
@@ -274,7 +290,6 @@
                 var onChange = event.target.getAttribute('class');
                 var toChange = flag.getAttribute('class');
                 var id = listItem.getAttribute('data-id');
-                this.getElement({ target: listItem, getAttribute: 'data-id' }, this);
 
                 if (!(onChange == toChange)) {
                     flag.setAttribute('class', onChange);
@@ -285,9 +300,6 @@
             function disableFlagListener(element) {
                 element.removeEventListener('click', this.changeFlag);
             }
-        },
-        getElement: function (obj) {
-            console.log(obj.target)
         },
         createElement: function (tag, props, childrens) {
             var element = document.createElement(tag);
@@ -315,12 +327,8 @@
             var listItem = this.createLi(data);
             this.list.appendChild(listItem);
             data.completed = false;
-            var obj = {
-                type: 'POST',
-                id: '',
-                body: data
-            };
-            controller.postData(obj);
+            data.date = dateString;
+            controller.postData(data);
 
             function addEventListeners(listItem) {
                 this.checkbox = listItem.querySelector('.checkbox');

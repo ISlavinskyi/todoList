@@ -30,6 +30,8 @@ var routes = function (userData) {
                     data.title = req.body.title;
                 } else if (req.body.hasOwnProperty('priority')) {
                     data.priority = req.body.priority;
+                } else if (req.body.hasOwnProperty('date')) {
+                    data.date = req.body.date;
                 }
                 res.status(200);
                 data.save();
