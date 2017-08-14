@@ -289,5 +289,7 @@ input {
 .filter-text .fa-flag {
     cursor: pointer;
 }
-
+.filter-data {
+    display: none;
+}
 

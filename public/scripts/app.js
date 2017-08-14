@@ -154,6 +154,10 @@
             this.input = document.querySelector('#add-input');
             this.form = document.querySelector('#todo-form');
             this.list = document.querySelector('#todo-list');
+            this.filter = document.querySelector('.filter-text');            
+            
+            this.filter.addEventListener('click', filterClick);
+
             if (data.length > 0) {
                 len = data.length;
                 idEl = data[len - 1].id || 1;
@@ -163,6 +167,30 @@
                 }
             }
             this.form.addEventListener('submit', addHandler.bind(this))
+            function filterClick(event) {
+                var list = document.querySelectorAll('.todo-item');
+                // if(event.target) event.target.classList.contains('important-2')
+                var priority = event.target.className[event.target.className.length-1];
+                console.log(priority);
+                for(var i = 0; i < data.length; i++) {
+                    var listId = list[i].getAttribute('data-id');
+                    var flag = list[i].querySelector('.fa');
+                    if(flag.className[flag.className.length-1] != priority) {
+                        list[i].classList.add('filter-data');
+                        
+                    } else {
+                        console.log(listId);
+                        console.log(list[i]);
+                    }
+                    
+                    //     // var element = controller.findElement(data[i].id);
+                    //     // element.classList.add('filter-data');
+                        
+                    //     console.log(list);
+                    // }
+                }
+                
+            }
             function addHandler(event) {
                 event.preventDefault();
                 try {
